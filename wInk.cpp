@@ -1,7 +1,7 @@
 #include<wInk.h>
 #define paramSwapint16_t(a, b) { int16_t t = a; a = b; b = t; }
 
-const uint8_t lut_full_update[] __attribute__((aligned(4))) =
+const uint8_t lut_full_update_2DOT9[] __attribute__((aligned(4))) =
 {
 	0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22, 
 	0x66, 0x69, 0x69, 0x59, 0x58, 0x99, 0x99, 0x88, 
@@ -9,12 +9,28 @@ const uint8_t lut_full_update[] __attribute__((aligned(4))) =
 	0x35, 0x51, 0x51, 0x19, 0x01, 0x00
 };
 
-const uint8_t lut_partial_update[] __attribute__((aligned(4))) =
+const uint8_t lut_partial_update_2DOT9[] __attribute__((aligned(4))) =
 {
 	0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x13, 0x14, 0x44, 0x12, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const uint8_t lut_full_update_2DOT13[] __attribute__((aligned(4))) =
+{
+    0x22, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x11, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x1E, 0x1E, 0x1E, 0x1E, 0x1E, 0x1E, 0x1E, 0x1E, 
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const uint8_t lut_partial_update_2DOT13[] __attribute__((aligned(4))) =
+{
+    0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x0F, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS, SPIClass *useSPI) : Adafruit_GFX(wWidth, wHeight) {
@@ -24,7 +40,8 @@ wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RS
 	cs = CS;
 	spi = useSPI;
 	buffer = NULL;
-	lut = lut_full_update;
+	lut = lut_full_update_2DOT9;
+	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
 	spiSettings = SPISettings(2000000, MSBFIRST, SPI_MODE0);
 }
 
@@ -157,13 +174,17 @@ void wInkDisplay::_sendData(uint8_t data){
 
 void wInkDisplay::setLutFull() {
 	spi->beginTransaction(spiSettings);
-	_setLut(lut_full_update);
+	lut = lut_full_update_2DOT9;
+	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
+	_setLut(lut);
 	spi->endTransaction();
 }
 
 void wInkDisplay::setLutPartial() {
 	spi->beginTransaction(spiSettings);
-	_setLut(lut_partial_update);
+	lut = lut_partial_update_2DOT9;
+	if(wWidth == 128 && height == 250) lut = lut_partial_update_2DOT13;
+	_setLut(lut);
 	spi->endTransaction();
 }
 
