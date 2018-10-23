@@ -33,6 +33,22 @@ const uint8_t lut_partial_update_2DOT13[] __attribute__((aligned(4))) =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
+const unsigned char lut_full_update_1DOT54[] =
+{
+    0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22, 
+    0x66, 0x69, 0x69, 0x59, 0x58, 0x99, 0x99, 0x88, 
+    0x00, 0x00, 0x00, 0x00, 0xF8, 0xB4, 0x13, 0x51, 
+    0x35, 0x51, 0x51, 0x19, 0x01, 0x00
+};
+
+const unsigned char lut_partial_update_1DOT54[] =
+{
+    0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x13, 0x14, 0x44, 0x12, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS, SPIClass *useSPI) : Adafruit_GFX(wWidth, wHeight) {
 	busy = BUSY;
 	rst = RST;
@@ -42,6 +58,7 @@ wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RS
 	buffer = NULL;
 	lut = lut_full_update_2DOT9;
 	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
+	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
 	spiSettings = SPISettings(2000000, MSBFIRST, SPI_MODE0);
 }
 
@@ -176,6 +193,7 @@ void wInkDisplay::setLutFull() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_full_update_2DOT9;
 	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
+	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }
@@ -184,6 +202,7 @@ void wInkDisplay::setLutPartial() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_partial_update_2DOT9;
 	if(wWidth == 128 && height == 250) lut = lut_partial_update_2DOT13;
+	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }

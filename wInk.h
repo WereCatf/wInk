@@ -39,6 +39,7 @@ typedef uint32_t PortMask;
 #define WAVESHARE_2DOT9	128, 296
 //2DOT13 visible resolution is 122x250
 #define WAVESHARE_2DOT13 128, 250
+#define WAVESHARE_1DOT54 200, 200
 
 class wInkDisplay : public Adafruit_GFX {
  public:
