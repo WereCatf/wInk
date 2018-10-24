@@ -18,10 +18,12 @@ void setup() {
   display.setRotation(3);
   display.setCursor(2, 2);
   display.println("e-Ink Test!");
+#if defined (ESP8266) || defined (ESP32)
   display.setCursor(2, display.getCursorY());
   display.println("Running on ESP32");
   display.setCursor(2, display.getCursorY());
   display.println("Free heap: " + String(ESP.getFreeHeap()));
+#endif
   display.drawRect(0, 0, display.width(), display.height(), WINK_BLACK);
   display.drawFastHLine(10, 72, 27, WINK_BLACK);
   display.drawPixel(10, 74, WINK_BLACK);

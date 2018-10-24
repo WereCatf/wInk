@@ -57,8 +57,8 @@ wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RS
 	spi = useSPI;
 	buffer = NULL;
 	lut = lut_full_update_2DOT9;
-	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
-	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
+	if(wWidth == 128 && wHeight == 250) lut = lut_full_update_2DOT13;
+	else if(wWidth == 200 && wHeight == 200) lut = lut_full_update_1DOT54;
 	spiSettings = SPISettings(2000000, MSBFIRST, SPI_MODE0);
 }
 
@@ -192,8 +192,8 @@ void wInkDisplay::_sendData(uint8_t data){
 void wInkDisplay::setLutFull() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_full_update_2DOT9;
-	if(wWidth == 128 && height == 250) lut = lut_full_update_2DOT13;
-	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
+	if(WIDTH == 128 && HEIGHT == 250) lut = lut_partial_update_2DOT13;
+	else if(WIDTH == 200 && HEIGHT == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }
@@ -201,8 +201,8 @@ void wInkDisplay::setLutFull() {
 void wInkDisplay::setLutPartial() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_partial_update_2DOT9;
-	if(wWidth == 128 && height == 250) lut = lut_partial_update_2DOT13;
-	else if(wWidth == 200 && height == 200) lut = lut_full_update_1DOT54;
+	if(WIDTH == 128 && HEIGHT == 250) lut = lut_partial_update_2DOT13;
+	else if(WIDTH == 200 && HEIGHT == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }
@@ -218,7 +218,14 @@ void wInkDisplay::_setLut(const uint8_t * _lut) {
 	digitalWrite(cs, LOW);
 	//*_csport &= ~_cspinmask;
 
+#if defined (ESP8266) || defined (ESP32)
 	spi->writeBytes((uint8_t *)_lut, 30);
+#elif defined (__STM32F1__)
+	spi->write((const void *)_lut, 30);
+#else
+	for(uint8_t i=0; i < 30; i++)
+		spi->transfer(_lut[i]);
+#endif
 	//Write pin HIGH
 	digitalWrite(cs, HIGH);
 	//*_csport |= _cspinmask;
