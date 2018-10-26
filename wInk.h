@@ -36,14 +36,16 @@ typedef uint32_t PortMask;
 #define WINK_WHITE 1
 #define WINK_INVERSE 2
 
-#define WAVESHARE_2DOT9	128, 296
+#define WAVESHARE_2DOT9	128, 296, false
 //2DOT13 visible resolution is 122x250
-#define WAVESHARE_2DOT13 128, 250
-#define WAVESHARE_1DOT54 200, 200
+#define WAVESHARE_2DOT13 128, 250, false
+#define WAVESHARE_1DOT54 200, 200, false
+
+#define WAVESHARE_2DOT9_TRICOLOUR	128, 296, true
 
 class wInkDisplay : public Adafruit_GFX {
  public:
-  wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS = SS, SPIClass *useSPI = &SPI);
+  wInkDisplay(int16_t wWidth, int16_t wHeight, bool tricolour, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS = SS, SPIClass *useSPI = &SPI);
   ~wInkDisplay();
   void drawPixel(int16_t x, int16_t y, uint16_t colour);
   void sendCommand(uint8_t comm);
@@ -60,7 +62,7 @@ class wInkDisplay : public Adafruit_GFX {
   more likely no ghost-image left behind.
   */
   void setLutFull();
-  bool begin();
+  bool begin(bool useTiledMemory = false);
   void busyWait();
   bool isBusy();
   void clearDisplay(uint8_t colour);

@@ -66,7 +66,7 @@ wInkDisplay::~wInkDisplay(){
 	free(buffer);
 }
 
-bool wInkDisplay::begin() {
+bool wInkDisplay::begin(bool useTiledMemory) {
 	if(WIDTH == 0 || HEIGHT == 0) return false;
 
 	//If we're waking from sleep, buffer won't be NULL
