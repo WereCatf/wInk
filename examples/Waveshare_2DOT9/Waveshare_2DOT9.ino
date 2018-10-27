@@ -4,6 +4,8 @@
 // 128x296 display, BUSY-pin 27, RST-pin 16, DC-pin 17 on ESP32
 wInkDisplay display(WAVESHARE_2DOT9, 27, 16, 17);
 
+uint8_t rot = 0;
+
 void setup() {
   Serial.begin(115200);
 
@@ -11,11 +13,13 @@ void setup() {
     Serial.println("display.begin() failed, couldn't allocate memory for the display-buffer!");
     while(true) delay(1000);
   }
+}
 
+void loop() {
   Serial.println("Draw something on the display...");
   display.setTextColor(WINK_BLACK);
   display.clearDisplay(WINK_WHITE);
-  display.setRotation(3);
+  display.setRotation(rot);
   display.setCursor(2, 2);
   display.println("e-Ink Test!");
 #if defined (ESP8266) || defined (ESP32)
@@ -36,8 +40,7 @@ void setup() {
   display.display();
   //You should put these displays to sleep when not actively needed
   display.sleep();
-}
-
-void loop() {
   delay(10000);
+  display.wakeUp();
+  if(rot++ > 3) rot = 0;
 }

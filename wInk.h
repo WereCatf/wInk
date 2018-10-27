@@ -38,7 +38,7 @@ typedef uint32_t PortMask;
 
 #define WAVESHARE_2DOT9	128, 296, false
 //2DOT13 visible resolution is 122x250
-#define WAVESHARE_2DOT13 128, 250, false
+#define WAVESHARE_2DOT13 122, 250, false
 #define WAVESHARE_1DOT54 200, 200, false
 
 #define WAVESHARE_2DOT9_TRICOLOUR	128, 296, true
@@ -65,7 +65,8 @@ class wInkDisplay : public Adafruit_GFX {
   bool begin(bool useTiledMemory = false);
   void busyWait();
   bool isBusy();
-  void clearDisplay(uint8_t colour);
+  void clearDisplay(uint16_t colour);
+  void fillScreen(uint16_t colour);
   void display(bool waitUntilFinished = true);
   /*
   The higher the contrast, the stronger any ghosting
@@ -88,6 +89,7 @@ class wInkDisplay : public Adafruit_GFX {
   /*volatile PortReg *dcPort, *csPort, *busyPort;
   PortMask csPinmask, dcPinmask, busyPinmask;*/
   SPISettings spiSettings;
+  uint16_t PHYSWIDTH, PHYSHEIGHT;
 
   void _sendCommand(uint8_t comm);
   void _sendData(uint8_t data);

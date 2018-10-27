@@ -1,7 +1,7 @@
 #include<wInk.h>
 #define paramSwapint16_t(a, b) { int16_t t = a; a = b; b = t; }
 
-const uint8_t lut_full_update_2DOT9[] __attribute__((aligned(4))) =
+const uint8_t lut_full_update_2DOT9[] __attribute__((aligned(4))) PROGMEM =
 {
 	0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22, 
 	0x66, 0x69, 0x69, 0x59, 0x58, 0x99, 0x99, 0x88, 
@@ -9,7 +9,7 @@ const uint8_t lut_full_update_2DOT9[] __attribute__((aligned(4))) =
 	0x35, 0x51, 0x51, 0x19, 0x01, 0x00
 };
 
-const uint8_t lut_partial_update_2DOT9[] __attribute__((aligned(4))) =
+const uint8_t lut_partial_update_2DOT9[] __attribute__((aligned(4))) PROGMEM =
 {
 	0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -17,7 +17,7 @@ const uint8_t lut_partial_update_2DOT9[] __attribute__((aligned(4))) =
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-const uint8_t lut_full_update_2DOT13[] __attribute__((aligned(4))) =
+const uint8_t lut_full_update_2DOT13[] __attribute__((aligned(4))) PROGMEM =
 {
     0x22, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x11, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -25,7 +25,7 @@ const uint8_t lut_full_update_2DOT13[] __attribute__((aligned(4))) =
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-const uint8_t lut_partial_update_2DOT13[] __attribute__((aligned(4))) =
+const uint8_t lut_partial_update_2DOT13[] __attribute__((aligned(4))) PROGMEM =
 {
     0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -33,7 +33,7 @@ const uint8_t lut_partial_update_2DOT13[] __attribute__((aligned(4))) =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-const unsigned char lut_full_update_1DOT54[] =
+const uint8_t lut_full_update_1DOT54[] __attribute__((aligned(4))) PROGMEM =
 {
     0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22, 
     0x66, 0x69, 0x69, 0x59, 0x58, 0x99, 0x99, 0x88, 
@@ -41,7 +41,7 @@ const unsigned char lut_full_update_1DOT54[] =
     0x35, 0x51, 0x51, 0x19, 0x01, 0x00
 };
 
-const unsigned char lut_partial_update_1DOT54[] =
+const uint8_t lut_partial_update_1DOT54[] __attribute__((aligned(4))) PROGMEM =
 {
     0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -49,7 +49,7 @@ const unsigned char lut_partial_update_1DOT54[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS, SPIClass *useSPI) : Adafruit_GFX(wWidth, wHeight) {
+wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, bool tricolour, int8_t BUSY, int8_t RST, int8_t DC, int8_t CS, SPIClass *useSPI) : Adafruit_GFX(wWidth, wHeight) {
 	busy = BUSY;
 	rst = RST;
 	dc = DC;
@@ -57,7 +57,12 @@ wInkDisplay::wInkDisplay(int16_t wWidth, int16_t wHeight, int8_t BUSY, int8_t RS
 	spi = useSPI;
 	buffer = NULL;
 	lut = lut_full_update_2DOT9;
-	if(wWidth == 128 && wHeight == 250) lut = lut_full_update_2DOT13;
+	PHYSWIDTH = wWidth;
+	PHYSHEIGHT = wHeight;
+	if(wWidth == 122 && wHeight == 250){
+		lut = lut_full_update_2DOT13;
+		PHYSWIDTH = 128;
+	}
 	else if(wWidth == 200 && wHeight == 200) lut = lut_full_update_1DOT54;
 	spiSettings = SPISettings(2000000, MSBFIRST, SPI_MODE0);
 }
@@ -67,15 +72,15 @@ wInkDisplay::~wInkDisplay(){
 }
 
 bool wInkDisplay::begin(bool useTiledMemory) {
-	if(WIDTH == 0 || HEIGHT == 0) return false;
+	if(PHYSWIDTH == 0 || PHYSHEIGHT == 0) return false;
 
 	//If we're waking from sleep, buffer won't be NULL
 	//and none of this stuff is needed, since it's
 	//already been done once
 	if(buffer == NULL){
-		buffer = reinterpret_cast<uint8_t*>(malloc(WIDTH * HEIGHT / 8));
+		buffer = reinterpret_cast<uint8_t*>(malloc(PHYSWIDTH * PHYSHEIGHT / 8));
 		if (buffer == NULL) return false;
-		memset(buffer, 0, (WIDTH*HEIGHT/8));
+		memset(buffer, 0, (PHYSWIDTH*PHYSHEIGHT/8));
 
 		pinMode(cs, OUTPUT);
 		pinMode(rst, OUTPUT);
@@ -100,8 +105,8 @@ bool wInkDisplay::begin(bool useTiledMemory) {
 	spi->beginTransaction(spiSettings);
 
 	_sendCommand(WINK_DRIVER_OUTPUT_CONTROL);
-	_sendData((HEIGHT - 1) & 0xFF);
-	_sendData(((HEIGHT - 1) >> 8) & 0xFF);
+	_sendData((PHYSHEIGHT - 1) & 0xFF);
+	_sendData(((PHYSHEIGHT - 1) >> 8) & 0xFF);
 	_sendData(0x00);	// GD = 0; SM = 0; TB = 0;
 	_sendCommand(WINK_BOOSTER_SOFT_START_CONTROL);
 	_sendData(0xD7);
@@ -122,13 +127,13 @@ bool wInkDisplay::begin(bool useTiledMemory) {
 }
 
 inline void wInkDisplay::drawAbsolutePixel(int16_t x, int16_t y, uint16_t colour) {
-	if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
+	if(x < 0 || x >= PHYSWIDTH || y < 0 || y >= PHYSHEIGHT) return;
 	if(colour == WINK_INVERSE){
-		buffer[(x + y * WIDTH) / 8] ^= 0x80 >> (x % 8);
+		buffer[(x + y * PHYSWIDTH) / 8] ^= 0x80 >> (x % 8);
 		return;
 	}
-	if(colour == WINK_BLACK) buffer[(x + y * WIDTH) / 8] &= ~(0x80 >> (x % 8));
-	else buffer[(x + y * WIDTH) / 8] |= 0x80 >> (x % 8);
+	if(colour == WINK_BLACK) buffer[(x + y * PHYSWIDTH) / 8] &= ~(0x80 >> (x % 8));
+	else buffer[(x + y * PHYSWIDTH) / 8] |= 0x80 >> (x % 8);
 }
 
 void wInkDisplay::drawPixel(int16_t x, int16_t y, uint16_t colour) {
@@ -140,13 +145,13 @@ void wInkDisplay::drawPixel(int16_t x, int16_t y, uint16_t colour) {
 			drawAbsolutePixel(x, y, colour);
 			break;
 		case 1:
-			drawAbsolutePixel(WIDTH - y - 1, x, colour);
+			drawAbsolutePixel(PHYSWIDTH - y - 1, x, colour);
 			break;
 		case 2:
-			drawAbsolutePixel(WIDTH - x - 1, HEIGHT - y - 1, colour);
+			drawAbsolutePixel(PHYSWIDTH - x - 1, PHYSHEIGHT - y - 1, colour);
 			break;
 		case 3:
-			drawAbsolutePixel(y, HEIGHT - x - 1, colour);
+			drawAbsolutePixel(y, PHYSHEIGHT - x - 1, colour);
 			break;
 	}
 }
@@ -192,8 +197,8 @@ void wInkDisplay::_sendData(uint8_t data){
 void wInkDisplay::setLutFull() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_full_update_2DOT9;
-	if(WIDTH == 128 && HEIGHT == 250) lut = lut_partial_update_2DOT13;
-	else if(WIDTH == 200 && HEIGHT == 200) lut = lut_full_update_1DOT54;
+	if(PHYSWIDTH == 128 && PHYSHEIGHT == 250) lut = lut_full_update_2DOT13;
+	else if(PHYSWIDTH == 200 && PHYSHEIGHT == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }
@@ -201,8 +206,8 @@ void wInkDisplay::setLutFull() {
 void wInkDisplay::setLutPartial() {
 	spi->beginTransaction(spiSettings);
 	lut = lut_partial_update_2DOT9;
-	if(WIDTH == 128 && HEIGHT == 250) lut = lut_partial_update_2DOT13;
-	else if(WIDTH == 200 && HEIGHT == 200) lut = lut_full_update_1DOT54;
+	if(PHYSWIDTH == 128 && PHYSHEIGHT == 250) lut = lut_partial_update_2DOT13;
+	else if(PHYSWIDTH == 200 && PHYSHEIGHT == 200) lut = lut_full_update_1DOT54;
 	_setLut(lut);
 	spi->endTransaction();
 }
@@ -217,15 +222,8 @@ void wInkDisplay::_setLut(const uint8_t * _lut) {
 	//Write pin LOW
 	digitalWrite(cs, LOW);
 	//*_csport &= ~_cspinmask;
-
-#if defined (ESP8266) || defined (ESP32)
-	spi->writeBytes((uint8_t *)_lut, 30);
-#elif defined (__STM32F1__)
-	spi->write((const void *)_lut, 30);
-#else
 	for(uint8_t i=0; i < 30; i++)
-		spi->transfer(_lut[i]);
-#endif
+		spi->transfer(pgm_read_byte(_lut + i));
 	//Write pin HIGH
 	digitalWrite(cs, HIGH);
 	//*_csport |= _cspinmask;
@@ -248,18 +246,18 @@ bool wInkDisplay::isBusy() {
 	return digitalRead(busy);
 }
 
-void wInkDisplay::clearDisplay(uint8_t colour) {
+void wInkDisplay::clearDisplay(uint16_t colour) {
 	if(buffer == NULL) return;
 
 	if(colour == WINK_INVERSE){
-		for(uint32_t i=0; i < (WIDTH*HEIGHT/8); i++)
+		for(uint32_t i=0; i < (PHYSWIDTH*PHYSHEIGHT/8); i++)
 			*(buffer + i) = ~*(buffer + i);
 		return;
 	}
 
 	if(colour == WINK_WHITE) colour = 0xFF;
 	else if(colour == WINK_BLACK) colour = 0x00;
-	memset(buffer, colour, (WIDTH*HEIGHT/8));
+	memset(buffer, colour, (PHYSWIDTH*PHYSHEIGHT/8));
 }
 
 void wInkDisplay::display(bool waitUntilFinished) {
@@ -267,11 +265,23 @@ void wInkDisplay::display(bool waitUntilFinished) {
 	busyWait();
 	spi->beginTransaction(spiSettings);
 
-	setMemoryArea(0, 0, WIDTH - 1, HEIGHT - 1);
+	setMemoryArea(0, 0, PHYSWIDTH - 1, PHYSHEIGHT - 1);
 	setMemoryPointer(0, 0);
 	_sendCommand(WINK_WRITE_RAM);
-	for (uint16_t i = 0; i < (WIDTH * HEIGHT / 8); i++)
-		_sendData(buffer[i]);
+
+	digitalWrite(dc, HIGH);
+	digitalWrite(cs, LOW);
+
+#if defined (ESP8266) || defined (ESP32)
+	spi->writeBytes((uint8_t *)buffer, PHYSWIDTH * PHYSHEIGHT / 8);
+#elif defined (__STM32F1__)
+	spi->write((const void *)buffer, PHYSWIDTH * PHYSHEIGHT / 8);
+#else
+	for (uint16_t i = 0; i < (PHYSWIDTH * PHYSHEIGHT / 8); i++)
+		spi->transfer(buffer[i]);
+#endif
+	digitalWrite(cs, HIGH);
+//		_sendData(buffer[i]);
 
 	_sendCommand(WINK_DISPLAY_UPDATE_CONTROL_2);
 	_sendData(0xC4);
@@ -317,18 +327,18 @@ void wInkDisplay::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t colour
 			break;
 		case 1:
 			paramSwapint16_t(x, y);
-			x = WIDTH - x - 1;
+			x = PHYSWIDTH - x - 1;
 			drawFastVLineAbsolute(x, y, w, colour);
 			break;
 		case 2:
-			x = WIDTH - x - 1;
-			y = HEIGHT - y - 1;
+			x = PHYSWIDTH - x - 1;
+			y = PHYSHEIGHT - y - 1;
 			x -= (w - 1);
 			drawFastHLineAbsolute(x, y, w, colour);
 			break;
 		case 3:
 			paramSwapint16_t(x, y);
-			y = HEIGHT - y - 1;
+			y = PHYSHEIGHT - y - 1;
 			y -= (w - 1);
 			drawFastVLineAbsolute(x, y, w, colour);
 			break;
@@ -341,17 +351,17 @@ void wInkDisplay::drawFastHLineAbsolute(int16_t x, int16_t y, int16_t w, uint16_
 	static uint8_t premask[8] = {0xFF, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F };
     static uint8_t postmask[8] = {0x00, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE };
 
-	if(x >= WIDTH || y >= HEIGHT || y < 0 || w <= 0) return;
+	if(x >= PHYSWIDTH || y >= PHYSHEIGHT || y < 0 || w <= 0) return;
 	if(buffer == NULL) return;
 
 	if(x < 0){
 		w += x;
 		x = 0;
 	}
-	if(x + w >= WIDTH)
-		w = WIDTH - x;
+	if(x + w >= PHYSWIDTH)
+		w = PHYSWIDTH - x;
 
-	pBuffer = buffer + ((y * WIDTH + x) / 8);
+	pBuffer = buffer + ((y * PHYSWIDTH + x) / 8);
 	if(x & 7) {
 		i = 8 - (x & 7);
 		mask = premask[i];
@@ -402,19 +412,19 @@ void wInkDisplay::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t colour
 			break;
 		case 1:
 			paramSwapint16_t(x, y);
-			x = WIDTH - x - 1;
+			x = PHYSWIDTH - x - 1;
 			x -= (h - 1);
 			drawFastHLineAbsolute(x, y, h, colour);
 			break;
 		case 2:
-			x = WIDTH - x - 1;
-			y = HEIGHT - y - 1;
+			x = PHYSWIDTH - x - 1;
+			y = PHYSHEIGHT - y - 1;
 			y -= (h - 1);
 			drawFastVLineAbsolute(x, y, h, colour);
 			break;
 		case 3:
 			paramSwapint16_t(x, y);
-			y = HEIGHT - y - 1;
+			y = PHYSHEIGHT - y - 1;
 			drawFastHLineAbsolute(x, y, h, colour);
 			break;
 	}
@@ -422,38 +432,42 @@ void wInkDisplay::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t colour
 
 void wInkDisplay::drawFastVLineAbsolute(int16_t x, int16_t y, int16_t h, uint16_t colour) {
 	uint8_t *pBuffer, mask;
-	if(x < 0 || x >= WIDTH)
+	if(x < 0 || x >= PHYSWIDTH)
 		return;
 	if(y < 0) {
 		h += y;
 		y = 0;
 	}
-	if( (y + h) > HEIGHT) {
-		h = (HEIGHT - y);
+	if( (y + h) > PHYSHEIGHT) {
+		h = (PHYSHEIGHT - y);
 	}
 	if(h <= 0)
 		return;
-	pBuffer = buffer + ((y * WIDTH + x) / 8);
+	pBuffer = buffer + ((y * PHYSWIDTH + x) / 8);
 	mask = 0x80 >> (x&7);
 	switch (colour){
 		case WINK_WHITE:
 			while(h--){
 				*pBuffer |= mask;
-				pBuffer += WIDTH / 8;
+				pBuffer += PHYSWIDTH / 8;
 			}
 			break;
 		case WINK_BLACK:
 			mask = ~mask;
 			while(h--){
 				*pBuffer &= mask;
-				pBuffer += WIDTH / 8;
+				pBuffer += PHYSWIDTH / 8;
 			}
 			break;
 		case WINK_INVERSE:
 			while(h--){
 				*pBuffer ^= mask;
-				pBuffer += WIDTH / 8;
+				pBuffer += PHYSWIDTH / 8;
 			}
 			break;
 	}
+}
+
+void wInkDisplay::fillScreen(uint16_t colour) {
+	clearDisplay(colour);
 }

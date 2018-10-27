@@ -8,7 +8,7 @@ A library for the Waveshare e-Ink - displays utilizing the Adafruit_GFX - librar
 
 # TODO
 * Performance-optimizations
-* Move lut to flash
+* ~~Move lut to flash~~
 * tricolour- and tiling-support
 * Add the rest of Waveshare-displays
 * See about reducing RAM-requirements
