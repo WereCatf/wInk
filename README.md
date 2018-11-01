@@ -3,6 +3,7 @@ A library for the Waveshare e-Ink - displays utilizing the Adafruit_GFX - librar
 
 # Supported displays (so far)
 * Waveshare 2.9" black-and-white (tested)
+* Waveshare 2.9" tri-colour (tested)
 * Waveshare 1.5" black-and-white (untested, ain't got one)
 * Waveshare 2.13" black-and-white (untested, ain't got one)
 
@@ -12,3 +13,5 @@ A library for the Waveshare e-Ink - displays utilizing the Adafruit_GFX - librar
 * tricolour- and tiling-support
 * Add the rest of Waveshare-displays
 * See about reducing RAM-requirements
+
+![Two e-Ink-displays](/img/Wink.jpg)

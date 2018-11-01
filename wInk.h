@@ -32,9 +32,44 @@ typedef uint32_t PortMask;
 #define WINK_SET_RAM_Y_ADDRESS_COUNTER		0x4F
 #define WINK_TERMINATE_FRAME_READ_WRITE		0xFF
 
+// Tricolour-display commands
+#define WINK_TRI_PANEL_SETTING                               0x00
+#define WINK_TRI_POWER_SETTING                               0x01
+#define WINK_TRI_POWER_OFF                                   0x02
+#define WINK_TRI_POWER_OFF_SEQUENCE_SETTING                  0x03
+#define WINK_TRI_POWER_ON                                    0x04
+#define WINK_TRI_POWER_ON_MEASURE                            0x05
+#define WINK_TRI_BOOSTER_SOFT_START                          0x06
+#define WINK_TRI_DEEP_SLEEP                                  0x07
+#define WINK_TRI_DATA_START_TRANSMISSION_1                   0x10
+#define WINK_TRI_DATA_STOP                                   0x11
+#define WINK_TRI_DISPLAY_REFRESH                             0x12
+#define WINK_TRI_DATA_START_TRANSMISSION_2                   0x13
+#define WINK_TRI_PLL_CONTROL                                 0x30
+#define WINK_TRI_TEMPERATURE_SENSOR_COMMAND                  0x40
+#define WINK_TRI_TEMPERATURE_SENSOR_CALIBRATION              0x41
+#define WINK_TRI_TEMPERATURE_SENSOR_WRITE                    0x42
+#define WINK_TRI_TEMPERATURE_SENSOR_READ                     0x43
+#define WINK_TRI_VCOM_AND_DATA_INTERVAL_SETTING              0x50
+#define WINK_TRI_LOW_POWER_DETECTION                         0x51
+#define WINK_TRI_TCON_SETTING                                0x60
+#define WINK_TRI_TCON_RESOLUTION                             0x61
+#define WINK_TRI_GET_STATUS                                  0x71
+#define WINK_TRI_AUTO_MEASURE_VCOM                           0x80
+#define WINK_TRI_VCOM_VALUE                                  0x81
+#define WINK_TRI_VCM_DC_SETTING_REGISTER                     0x82
+#define WINK_TRI_PARTIAL_WINDOW                              0x90
+#define WINK_TRI_PARTIAL_IN                                  0x91
+#define WINK_TRI_PARTIAL_OUT                                 0x92
+#define WINK_TRI_PROGRAM_MODE                                0xA0
+#define WINK_TRI_ACTIVE_PROGRAM                              0xA1
+#define WINK_TRI_READ_OTP_DATA                               0xA2
+#define WINK_TRI_POWER_SAVING                                0xE3
+
 #define WINK_BLACK 0
 #define WINK_WHITE 1
-#define WINK_INVERSE 2
+#define WINK_COLOUR 2
+#define WINK_INVERSE 3
 
 #define WAVESHARE_2DOT9	128, 296, false
 //2DOT13 visible resolution is 122x250
@@ -50,6 +85,8 @@ class wInkDisplay : public Adafruit_GFX {
   void drawPixel(int16_t x, int16_t y, uint16_t colour);
   void sendCommand(uint8_t comm);
   void sendData(uint8_t data);
+  void setMemoryArea(int16_t x_start, int16_t y_start, int16_t x_end, int16_t y_end);
+  void setMemoryPointer(int16_t x, int16_t y);
   /*
   This tells the display to only do a partial update.
   Faster, doesn't go full black-white cycle,
@@ -84,8 +121,10 @@ class wInkDisplay : public Adafruit_GFX {
   int8_t busy, rst, dc, cs;
   SPIClass *spi = NULL;
   uint8_t *buffer = NULL;
+  uint8_t *colourBuffer = NULL;
   uint8_t contrast = 0xA8;
   const uint8_t * lut = NULL;
+  bool tricolour = false;
   /*volatile PortReg *dcPort, *csPort, *busyPort;
   PortMask csPinmask, dcPinmask, busyPinmask;*/
   SPISettings spiSettings;
@@ -94,8 +133,8 @@ class wInkDisplay : public Adafruit_GFX {
   void _sendCommand(uint8_t comm);
   void _sendData(uint8_t data);
   void _setLut(const uint8_t * _lut);
-  void setMemoryArea(int16_t x_start, int16_t y_start, int16_t x_end, int16_t y_end);
-  void setMemoryPointer(int16_t x, int16_t y);
+  void _setMemoryArea(int16_t x_start, int16_t y_start, int16_t x_end, int16_t y_end);
+  void _setMemoryPointer(int16_t x, int16_t y);
   void drawAbsolutePixel(int16_t x, int16_t y, uint16_t colour);
 };
 #endif
